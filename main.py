@@ -70,12 +70,16 @@ if __name__ == '__main__':
                     
         win.fill((255, 255, 255))
         player.draw(cam)
-        for platform in platforms:
-            platform.draw(cam)
 
         player.move((dt * movement[0], dt * movement[1]))
         cam.follow(player.get_pos(), (0, -30), smoothing=cameraSmoothing)
-
         player.jump(keysPressed[pygame.K_SPACE], dt)
+
+        for platform in platforms:
+            platform.draw(cam)
+            collision = platform.overlap(player)
+            for c in collision:
+                if c:
+                    player.collided(platform, collision)
         
         pygame.display.update()
