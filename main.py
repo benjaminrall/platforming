@@ -1,18 +1,18 @@
 from platform import Platform
-
-from pygame.constants import K_SPACE
+import json
 from player import Player
 import pygame
 import os
 from personallib.camera import Camera
 
 # Constants
-WIN_WIDTH = 800
+WIN_WIDTH = 1000
 WIN_HEIGHT = 800
 FRAMERATE = 120
 ICON_IMG = pygame.image.load(os.path.join("imgs", "icon.png"))
 
 # Pygame Setup
+pygame.font.init()
 win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption("Platforming Test")
 pygame.display.set_icon(ICON_IMG)
@@ -23,7 +23,12 @@ cam = Camera(win, 0, 0, 1)
 cam.set_bounds((0, 0), (0, 300), (False, False, False, True))
 player = Player(0, 0, 10)
 platforms = []
-platforms.append(Platform(-50, 10, 100, 12))
+try:
+    with open("platforms.json", "r") as f:
+        platforms = json.load(f)
+except:
+    pass
+platforms = [ Platform(p[0], p[1], p[2], p[3]) for p in platforms ]
 
 # Variables
 running = True
@@ -32,12 +37,16 @@ cameraSmoothing = 0.95
 keysPressed = {
     pygame.K_a: False,
     pygame.K_d: False,
-    pygame.K_SPACE: False
+    pygame.K_SPACE: False,
+    pygame.K_LCTRL: False
 }
 keyMovement = {
     pygame.K_a: (-1, 0),
     pygame.K_d: (1, 0),
 }
+font = pygame.font.SysFont(None, 48)
+fontImage = font.render("you win!", True, (0, 0, 0))
+debug = False
 
 # Subroutines
 def getMovement():
@@ -56,6 +65,8 @@ if __name__ == '__main__':
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                with open("platforms.json", "w") as f:
+                    json.dump([ p.get_rect() for p in platforms ], f)
                 running = False
                 pygame.quit()
                 exit()
@@ -63,10 +74,18 @@ if __name__ == '__main__':
                 if event.key in keysPressed:
                     keysPressed[event.key] = True
                     movement = getMovement()
+                elif event.key == pygame.K_c and debug:
+                    player.startPos = player.get_pos()
+                elif event.key == pygame.K_F3:
+                    debug = not debug
             elif event.type == pygame.KEYUP:
                 if event.key in keysPressed:
                     keysPressed[event.key] = False
                     movement = getMovement()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1 and keysPressed[pygame.K_LCTRL] and debug:
+                    m = cam.get_world_coord(pygame.mouse.get_pos())
+                    platforms.append(Platform(m[0] - 50, m[1] - 6, 100, 12))
                     
         win.fill((255, 255, 255))
         player.draw(cam)
@@ -81,5 +100,10 @@ if __name__ == '__main__':
             for c in collision:
                 if c:
                     player.collided(platform, collision)
+
+        if player.get_pos()[1] > 400:
+            player.die()
         
+        cam.blit(fontImage, (3080, -1200))
+
         pygame.display.update()
