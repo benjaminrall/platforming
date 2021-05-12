@@ -19,7 +19,7 @@ pygame.display.set_icon(ICON_IMG)
 clock = pygame.time.Clock()
 
 # Objects
-cam = Camera(win, 0, 0, 1)
+cam = Camera(win, 0, 0, 4)
 cam.set_bounds((0, 0), (0, 300), (False, False, False, True))
 player = Player(0, 0, 10)
 platforms = []
@@ -86,6 +86,9 @@ if __name__ == '__main__':
                 if event.button == 1 and keysPressed[pygame.K_LCTRL] and debug:
                     m = cam.get_world_coord(pygame.mouse.get_pos())
                     platforms.append(Platform(m[0] - 50, m[1] - 6, 100, 12))
+                elif event.button == 1:
+                    m = cam.get_world_coord(pygame.mouse.get_pos())
+                    print(m)
                     
         win.fill((255, 255, 255))
         player.draw(cam)
