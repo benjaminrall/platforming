@@ -19,7 +19,7 @@ pygame.display.set_icon(ICON_IMG)
 clock = pygame.time.Clock()
 
 # Objects
-cam = Camera(win, 0, 0, 4)
+cam = Camera(win, 0, 0, 1)
 cam.set_bounds((0, 0), (0, 300), (False, False, False, True))
 player = Player(0, 0, 10)
 platforms = []
